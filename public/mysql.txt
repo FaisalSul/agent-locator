@@ -1,0 +1,103 @@
+-- Drop the database if it exists
+DROP DATABASE IF EXISTS agent_locator;
+
+-- Create database
+CREATE DATABASE agent_locator;
+
+-- Use the database
+USE agent_locator;
+
+-- Create agents table
+CREATE TABLE IF NOT EXISTS agents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    agent_page_url VARCHAR(255) NOT NULL
+);
+
+-- Create states table
+CREATE TABLE IF NOT EXISTS states (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    state_name VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Create agent_states table to map agents to states
+CREATE TABLE IF NOT EXISTS agent_states (
+    agent_id INT NOT NULL,
+    state_id INT NOT NULL,
+    FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE CASCADE,
+    FOREIGN KEY (state_id) REFERENCES states(id) ON DELETE CASCADE,
+    PRIMARY KEY (agent_id, state_id)
+);
+
+-- Add indexes to foreign keys for better performance
+CREATE INDEX idx_agent_id ON agent_states(agent_id);
+CREATE INDEX idx_state_id ON agent_states(state_id);
+
+-- Populate states table
+INSERT INTO states (state_name) VALUES
+('alabama'),
+('arizona'),
+('california'),
+('colorado'),
+('connecticut'),
+('delaware'),
+('florida'),
+('georgia'),
+('illinois'),
+('indiana'),
+('iowa'),
+('kentucky'),
+('louisiana'),
+('maine'),
+('maryland'),
+('massachusetts'),
+('michigan'),
+('minnesota'),
+('missouri'),
+('nebraska'),
+('nevada'),
+('new hampshire'),
+('new jersey'),
+('new mexico'),
+('new york'),
+('north carolina'),
+('ohio'),
+('oklahoma'),
+('oregon'),
+('pennsylvania'),
+('south carolina'),
+('tennessee'),
+('texas'),
+('utah'),
+('virginia'),
+('west virginia'),
+('wisconsin'),
+('wyoming');
+ON DUPLICATE KEY UPDATE state_name=VALUES(state_name);
+
+-- Populate agents table
+INSERT INTO agents (name, agent_page_url) VALUES
+('Karin Cantwell', 'https://mpgroup.org/karin-cantwell/'),
+('Kevin Chaikin', 'https://mpgroup.org/kevin-chaikin/')
+ON DUPLICATE KEY UPDATE name=VALUES(name), agent_page_url=VALUES(agent_page_url);
+
+
+INSERT INTO agents (name, agent_page_url) VALUES
+('Dan Csaky', 'https://mpgroup.org/dan-csaky/')
+ON DUPLICATE KEY UPDATE name=VALUES(name), agent_page_url=VALUES(agent_page_url);
+
+-- Map agents to states in the agent_states table
+INSERT INTO agent_states (agent_id, state_id)
+SELECT agents.id, states.id FROM agents, states
+WHERE agents.name = 'Karin Cantwell' AND states.state_name IN ('Maryland', 'Virginia')
+ON DUPLICATE KEY UPDATE agent_id=VALUES(agent_id), state_id=VALUES(state_id);
+
+INSERT INTO agent_states (agent_id, state_id)
+SELECT agents.id, states.id FROM agents, states
+WHERE agents.name = 'Kevin Chaikin' AND states.state_name IN ('Maryland', 'Virginia')
+ON DUPLICATE KEY UPDATE agent_id=VALUES(agent_id), state_id=VALUES(state_id);
+
+INSERT INTO agent_states (agent_id, state_id)
+SELECT agents.id, states.id FROM agents, states
+WHERE agents.name = 'Dan Csaky' AND states.state_name IN ('Maryland', 'Virginia')
+ON DUPLICATE KEY UPDATE agent_id=VALUES(agent_id), state_id=VALUES(state_id);
