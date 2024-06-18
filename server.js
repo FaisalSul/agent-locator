@@ -45,10 +45,6 @@ app.get('/search', async (req, res, next) => {
         return lastNameA.localeCompare(lastNameB);
       });
 
-    if (results.length === 0) {
-      return res.json([]);
-    }
-
     res.json(results);
   } catch (err) {
     console.error('Error reading JSON file:', err);
